@@ -23,9 +23,10 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'djoser',
+    'channels',
     'drf_yasg',
     'users.apps.UsersConfig',
-    # 'tasks.apps.TasksConfig',
+    'tasks.apps.TasksConfig',
     'django_rq',
 ]
 
@@ -129,5 +130,15 @@ RQ_QUEUES = {
         'PORT': 6379,
         'DB': 0,
         'DEFAULT_TIMEOUT': 360,
+    },
+}
+
+RQ_SHOW_ADMIN_LINK = True
+
+ASGI_APPLICATION = 'task_service.routing.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
     },
 }

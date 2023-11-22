@@ -1,0 +1,14 @@
+venv
+.git
+db.sqlite3
+.idea
+.vscode
+.env
+.ruff_cache
+Dockerfile
+.dockerignore
+*/Dockerfile
+*/dockerignore
+*/db.sqlite3
+*/dat
+!data
