@@ -10,10 +10,17 @@ from .tasks import process_task
 class TaskViewSet(
     mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet
 ):
+    """
+    ViewSet для задач. Поддерживает создание и список задач.
+    """
+
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
 
     def create(self, request, *args, **kwargs):
+        """
+        Создает новую задачу и запускает её обработку.
+        """
         data = {
             'number': request.data.get('number'),
             'status': 'created',

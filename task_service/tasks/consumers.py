@@ -6,6 +6,10 @@ from .tasks import process_task
 
 
 class TaskConsumer(AsyncWebsocketConsumer):
+    """
+    Consumer для обработки WebSocket-подключений для задач.
+    """
+
     async def connect(self):
         await self.accept()
 
@@ -37,9 +41,15 @@ class TaskConsumer(AsyncWebsocketConsumer):
 
     @staticmethod
     def send_task_update(event):
+        """
+        Отправляет обновление о состоянии задачи клиенту.
+        """
         message = event['message']
         async_to_sync(TaskConsumer.send_task_message)({'message': message})
 
     async def send_task_message(self, event):
+        """
+        Отправляет сообщение о состоянии задачи клиенту.
+        """
         message = event['message']
         await self.send(text_data=json.dumps({'message': message}))
