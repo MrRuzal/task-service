@@ -3,6 +3,10 @@ from .models import CustomUser
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для модели CustomUser.
+    """
+
     class Meta:
         model = CustomUser
         fields = (
