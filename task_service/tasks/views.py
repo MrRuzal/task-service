@@ -1,28 +1,29 @@
-from django.http import JsonResponse
-from django.utils.decorators import method_decorator
-from django.views import View
-from django.views.decorators.csrf import csrf_exempt
+from rest_framework import viewsets, mixins
+from rest_framework.response import Response
+from rest_framework import status
 
 from .models import Task
 from .serializers import TaskSerializer
-# from .tasks import receive_task
+from .tasks import process_task
 
 
-@method_decorator(csrf_exempt, name='dispatch')
-class TaskView(View):
-    def post(self, request, *args, **kwargs):
+class TaskViewSet(
+    mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet
+):
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
+
+    def create(self, request, *args, **kwargs):
         data = {
-            'number': request.POST.get('number'),
+            'number': request.data.get('number'),
             'status': 'created',
         }
         serializer = TaskSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            # receive_task.delay(serializer.data)
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse({'error': 'Invalid data'}, status=400)
-
-    def get(self, request, *args, **kwargs):
-        tasks = Task.objects.all()
-        serializer = TaskSerializer(tasks, many=True)
-        return JsonResponse(serializer.data, safe=False)
+            process_task.delay(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(
+            {'error': 'Недопустимые данные'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )

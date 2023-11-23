@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  postgres:
+  db:
     image: postgres:latest
     environment:
       POSTGRES_DB: ${DB_NAME}
@@ -21,11 +21,21 @@ services:
 
   web:
     build: task_service/
-    command: ["gunicorn", "--bind", "0.0.0.0:8000", "task_service.wsgi"]
+    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     ports:
       - "8000:8000"
     depends_on:
-      - postgres
+      - db
+      - redis
+    env_file:
+      - .env
+    networks:
+      - app-network
+  rqworker:
+    build: task_service/
+    command: python manage.py rqworker
+    depends_on:
+      - web
       - redis
     env_file:
       - .env

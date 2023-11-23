@@ -6,6 +6,7 @@ psycopg2-binary==2.9.9
 python-dotenv==1.0.0
 pytest==7.4.3
 pytest-django==4.7.0
+pytest-redis==3.0.2
 redis==5.0.1
 rq==1.15.1
 channels==4.0.0

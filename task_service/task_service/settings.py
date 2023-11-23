@@ -10,7 +10,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', default='SUP3R-S3CR3T-K3Y-F0R-MY-PR0J3CT')
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
 
 INSTALLED_APPS = [
@@ -126,7 +126,7 @@ AUTH_USER_MODEL = 'users.CustomUser'
 
 RQ_QUEUES = {
     'default': {
-        'HOST': 'localhost',
+        'HOST': 'redis',
         'PORT': 6379,
         'DB': 0,
         'DEFAULT_TIMEOUT': 360,
