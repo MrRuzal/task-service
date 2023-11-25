@@ -1,12 +1,18 @@
-import pytest
-from tasks.models import Task
+from django.test import TestCase
+from django.test.client import RequestFactory
+from rest_framework import status
+from rest_framework.test import APIClient
+from unittest.mock import patch
 
 
-@pytest.mark.django_db
-def test_create_task_without_processing():
-    Task.objects.create(number=123, status='created')
+class TaskViewSetTest(TestCase):
+    def setUp(self):
+        self.factory = RequestFactory()
 
-    assert Task.objects.count() == 1
-    task = Task.objects.first()
-    assert task.number == 123
-    assert task.status == 'created'
+    @patch('tasks.views.process_task.delay')
+    def test_create_task(self, mock_process_task):
+        client = APIClient()
+        data = {'number': 123, 'status': 'created'}
+        response = client.post('/api/tasks/', data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
