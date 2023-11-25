@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 @job
 def process_task(task_id):
     """
-    Асинхронно обрабатывает задачу.
+    Запускает обработку задачи по её идентификатору и проверяет статус.
     """
     try:
         task = Task.objects.get(id=task_id)
@@ -22,23 +22,43 @@ def process_task(task_id):
         message = f'Задача с идентификатором {task_id} не существует.'
         logger.warning(message)
         raise ValueError(message)
-    from .consumers import TaskConsumer
 
     if task.status == 'created':
-        task.status = 'processing'
-        task.save()
-        logger.info(f'Задача {task.number} находится в обработке...')
-        # Предположим, что обработка задачи занимает 10 секунд
-        # Можно заменить этот код на свою логику
-        time.sleep(10)
-        task.status = 'completed'
-        task.save()
-        logger.info(f'Задача {task.number} успешно завершена.')
-        TaskConsumer().send_task_update(
-            {
-                'message': f'Задача {task.number} успешно завершена.',
-            }
-        )
+        process_created_task(task)
+    message = f'Статус задачи {task.number} не является "created".'
+    logger.warning(message)
+    raise ValueError(message)
+
+
+def process_created_task(task):
+    """
+    Обрабатывает задачу со статусом 'created'.
+    """
+    task.status = 'processing'
+    task.save()
+    logger.info(f'Задача {task.number} находится в обработке...')
+
+    # Предположим, что обработка задачи занимает 10 секунд
+    # Можно заменить этот код на свою логику
+    time.sleep(10)
+
+    complete_task(task)
+
+
+def complete_task(task):
+    """
+    Завершает обработку задачи и отправляет уведомление.
+    """
+    from .consumers import TaskConsumer
+
+    task.status = 'completed'
+    task.save()
+    logger.info(f'Задача {task.number} успешно завершена.')
+    TaskConsumer().send_task_update(
+        {
+            'message': f'Задача {task.number} успешно завершена.',
+        }
+    )
 
 
 @receiver(post_save, sender=Task)
