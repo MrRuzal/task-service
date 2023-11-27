@@ -1,6 +1,5 @@
-from rest_framework import viewsets, mixins
+from rest_framework import mixins, status, viewsets
 from rest_framework.response import Response
-from rest_framework import status
 
 from .models import Task
 from .serializers import TaskSerializer
@@ -11,26 +10,16 @@ class TaskViewSet(
     mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet
 ):
     """
-    ViewSet для задач. Поддерживает создание и список задач.
+    ViewSet для задач. Поддерживает создание, запуск обработки и список задач.
     """
 
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
 
     def create(self, request, *args, **kwargs):
-        """
-        Создает новую задачу и запускает её обработку.
-        """
-        data = {
-            'number': request.data.get('number'),
-            'status': 'created',
-        }
-        serializer = TaskSerializer(data=data)
+        serializer = TaskSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            process_task.delay(serializer.data)
+            process_task.delay(serializer.data['id'])
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(
-            {'error': 'Недопустимые данные'},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
