@@ -1,4 +1,5 @@
 import os
+
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -27,7 +28,8 @@ INSTALLED_APPS = [
     'drf_yasg',
     'users.apps.UsersConfig',
     'tasks.apps.TasksConfig',
-    'django_rq',
+    'django_celery_beat',
+    'django_celery_results',
 ]
 
 MIDDLEWARE = [
@@ -125,17 +127,6 @@ DJOSER = {
 
 AUTH_USER_MODEL = 'users.CustomUser'
 
-RQ_QUEUES = {
-    'default': {
-        'HOST': 'redis',
-        'PORT': 6379,
-        'DB': 0,
-        'DEFAULT_TIMEOUT': 360,
-    },
-}
-
-RQ_SHOW_ADMIN_LINK = True
-
 ASGI_APPLICATION = 'task_service.routing.application'
 
 CHANNEL_LAYERS = {
@@ -143,3 +134,21 @@ CHANNEL_LAYERS = {
         'BACKEND': 'channels.layers.InMemoryChannelLayer',
     },
 }
+
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+CELERY_ENABLE_UTC = True
+
+# Настройки кеша для Celery
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django.core.cache.backends.redis.RedisCache",
+#         "LOCATION": "redis://redis:6379/1",
+#     }
+# }
+
+# CELERY_CACHE_BACKEND = 'default'
