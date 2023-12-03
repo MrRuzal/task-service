@@ -47,11 +47,10 @@
 Выполнения задч можно просматривать в Celery Flower http://localhost:5555/
 
 Для проверки работоспособности время отработки указаны не большие. 
-При необходимости их нужно изменить в файлах celery.py и tasks.py 
-`DELETE_OLD_TASKS_SCHEDULE = timedelta(minutes=10)`
-`RETRY_STUCK_TASKS_SCHEDULE = timedelta(minutes=1)`
+При необходимости их нужно изменить в файлах celery.py и tasks.py  
+`DELETE_OLD_TASKS_SCHEDULE = timedelta(minutes=10)`  
+`RETRY_STUCK_TASKS_SCHEDULE = timedelta(minutes=1)`  
 `OLD_TASKS_THRESHOLD = timedelta(minutes=10)`
-
 
 ## Автор:
 Рузал Закиров [GitHub](https://github.com/devbkd/)
