@@ -1,6 +1,7 @@
 import json
+
 from channels.generic.websocket import AsyncWebsocketConsumer
-from asgiref.sync import async_to_sync
+
 from .models import Task
 from .tasks import process_task
 
@@ -28,7 +29,6 @@ class TaskConsumer(AsyncWebsocketConsumer):
                 )
             )
             return
-
         task = Task.objects.create(number=number, status='created')
         await self.send(
             text_data=json.dumps(
@@ -39,13 +39,12 @@ class TaskConsumer(AsyncWebsocketConsumer):
         )
         process_task.delay(task.id)
 
-    @staticmethod
-    def send_task_update(event):
+    async def send_task_update(self, event):
         """
         Отправляет обновление о состоянии задачи клиенту.
         """
         message = event['message']
-        async_to_sync(TaskConsumer.send_task_message)({'message': message})
+        await self.send_task_message({'message': message})
 
     async def send_task_message(self, event):
         """
