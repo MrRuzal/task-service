@@ -27,7 +27,7 @@ services:
 
   web:
     build: task_service/
-    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000" # команда на время разработки
+    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     ports:
       - "8000:8000"
     depends_on:
@@ -36,16 +36,37 @@ services:
     env_file:
       - .env
 
-
-  rqworker:
+  worker-celery:
     build: task_service/
-    command: python manage.py rqworker
+    command: celery -A task_service worker -l info
     depends_on:
-      db:
-        condition: service_healthy
+      - db
+      - redis
     env_file:
       - .env
+
+  celery-beat:
+    build: task_service/
+    command: celery -A task_service beat -l info
+    depends_on:
+      - db
+      - redis
+    env_file:
+      - .env
+
+  celery-flower:
+    restart: always
+    image: mher/flower
+    container_name: celery-flower
+    command: celery flower -l INFO --persisten=True
+    volumes:
+      - flower_data:/data
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+    ports:
+      - 5555:5555
 
 volumes:
   postgres_data:
   redis_data:
+  flower_data:
